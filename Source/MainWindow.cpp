@@ -25,6 +25,7 @@
 #include "UI/UIComponent.h"
 #include "UI/EditorViewport.h"
 #include <stdio.h>
+#include <future>
 //-----------------------------------------------------------------------
 
 static inline File getSavedStateDirectory() {
@@ -39,7 +40,7 @@ static inline File getSavedStateDirectory() {
 #endif
 }
 
-	MainWindow::MainWindow(const File& fileToLoad)
+MainWindow::MainWindow(const File& fileToLoad)
 : DocumentWindow(JUCEApplication::getInstance()->getApplicationName(),
 		Colour(Colours::black),
 		DocumentWindow::allButtons)
@@ -90,10 +91,10 @@ static inline File getSavedStateDirectory() {
 	else if (shouldReloadOnStartup)
 	{
 		File file = getSavedStateDirectory().getChildFile("lastConfig.xml");
-		ui->getEditorViewport()->loadState(file);
+		uiLoader = new UIBackgroundLoader(ui, file);
+		uiLoader->startThread();
+		//ui->getEditorViewport()->loadState(file);
 	}
-
-
 
 }
 
@@ -254,4 +255,23 @@ void MainWindow::loadWindowBounds()
 		delete xml;
 	}
 	// return "Everything went ok.";
+}
+
+UIBackgroundLoader::UIBackgroundLoader(UIComponent* ui, File loadFile) : Thread("Load UI"), ui(ui), loadFile(loadFile)
+{
+
+}
+
+UIBackgroundLoader::~UIBackgroundLoader()
+{
+
+}
+
+void UIBackgroundLoader::run()
+{
+	CoreServices::sendStatusMessage("Loading last used signal chain...");
+	wait(10); //HACK FOR NOW, should wait exactly until MessageManagerLock is available...
+	const MessageManagerLock mmLock;
+	ui->getEditorViewport()->loadState(loadFile);
+	CoreServices::sendStatusMessage("Finished loading signal chain.");
 }

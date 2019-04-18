@@ -28,6 +28,7 @@
 #include "UI/UIComponent.h"
 #include "Audio/AudioComponent.h"
 #include "Processors/ProcessorGraph/ProcessorGraph.h"
+#include "CoreServices.h"
 
 /**
   The main window for the GUI application.
@@ -39,6 +40,18 @@
 
 */
 
+class UIBackgroundLoader : public Thread
+{
+public:
+	UIBackgroundLoader(UIComponent* ui, File loadFile);
+	~UIBackgroundLoader();
+
+	void run();
+
+private:
+	UIComponent* ui;
+	File loadFile;
+};
 
 class MainWindow   : public DocumentWindow
 {
@@ -78,11 +91,10 @@ private:
     /** A pointer to the application's ProcessorGraph (owned by the MainWindow). */
     ScopedPointer<ProcessorGraph> processorGraph;
 
-
+	ScopedPointer<UIBackgroundLoader> uiLoader;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainWindow)
 
 };
-
 
 #endif  // __MAINWINDOW_H_BA75E17__
