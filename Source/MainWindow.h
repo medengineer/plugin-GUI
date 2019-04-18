@@ -84,5 +84,18 @@ private:
 
 };
 
+class UILoadInBackground : public Thread
+{
+public:
+	UILoadInBackground(UIComponent* ui, File loadFile);
+	~UILoadInBackground();
+
+	void run();
+
+private:
+	UIComponent* ui;
+	File loadFile;
+};
+
 
 #endif  // __MAINWINDOW_H_BA75E17__

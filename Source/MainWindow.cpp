@@ -25,6 +25,7 @@
 #include "UI/UIComponent.h"
 #include "UI/EditorViewport.h"
 #include <stdio.h>
+#include <future>
 //-----------------------------------------------------------------------
 
 static inline File getSavedStateDirectory() {
@@ -39,7 +40,7 @@ static inline File getSavedStateDirectory() {
 #endif
 }
 
-	MainWindow::MainWindow(const File& fileToLoad)
+MainWindow::MainWindow(const File& fileToLoad)
 : DocumentWindow(JUCEApplication::getInstance()->getApplicationName(),
 		Colour(Colours::black),
 		DocumentWindow::allButtons)
@@ -90,10 +91,10 @@ static inline File getSavedStateDirectory() {
 	else if (shouldReloadOnStartup)
 	{
 		File file = getSavedStateDirectory().getChildFile("lastConfig.xml");
-		ui->getEditorViewport()->loadState(file);
+		UILoadInBackground* t = new UILoadInBackground(ui, file);
+		t->startThread();
+		//ui->getEditorViewport()->loadState(file);
 	}
-
-
 
 }
 
@@ -254,4 +255,23 @@ void MainWindow::loadWindowBounds()
 		delete xml;
 	}
 	// return "Everything went ok.";
+}
+
+UILoadInBackground::UILoadInBackground(UIComponent* ui, File loadFile) : Thread("Load UI"), ui(ui), loadFile(loadFile)
+{
+
+}
+
+UILoadInBackground::~UILoadInBackground()
+{
+
+}
+
+void UILoadInBackground::run()
+{
+	std::cout << "Loading from seperate thread!" << std::endl;
+	wait(2000); //HACK FOR NOW, should wait until MessageManagerLock is available...
+	//Now the main UI has loaded and now we need to add some feedback indicating the UI is loading a signal chain
+	const MessageManagerLock mmLock;
+	ui->getEditorViewport()->loadState(loadFile);
 }
