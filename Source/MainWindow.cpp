@@ -257,16 +257,25 @@ void MainWindow::loadWindowBounds()
 	// return "Everything went ok.";
 }
 
+<<<<<<< HEAD
 UIBackgroundLoader::UIBackgroundLoader(UIComponent* ui, File loadFile) : Thread("Load UI"), ui(ui), loadFile(loadFile)
+=======
+UILoadInBackground::UILoadInBackground(UIComponent* ui, File loadFile) : Thread("Load UI"), ui(ui), loadFile(loadFile)
+>>>>>>> 583d0798e6b9f3c4d60798f2dd2100c4ce3c4ba3
 {
 
 }
 
+<<<<<<< HEAD
 UIBackgroundLoader::~UIBackgroundLoader()
+=======
+UILoadInBackground::~UILoadInBackground()
+>>>>>>> 583d0798e6b9f3c4d60798f2dd2100c4ce3c4ba3
 {
 
 }
 
+<<<<<<< HEAD
 void UIBackgroundLoader::run()
 {
 	CoreServices::sendStatusMessage("Loading last used signal chain...");
@@ -274,4 +283,13 @@ void UIBackgroundLoader::run()
 	const MessageManagerLock mmLock;
 	ui->getEditorViewport()->loadState(loadFile);
 	CoreServices::sendStatusMessage("Finished loading signal chain.");
+=======
+void UILoadInBackground::run()
+{
+	std::cout << "Loading from seperate thread!" << std::endl;
+	wait(2000); //HACK FOR NOW, should wait until MessageManagerLock is available...
+	//Now the main UI has loaded and now we need to add some feedback indicating the UI is loading a signal chain
+	const MessageManagerLock mmLock;
+	ui->getEditorViewport()->loadState(loadFile);
+>>>>>>> 583d0798e6b9f3c4d60798f2dd2100c4ce3c4ba3
 }
