@@ -37,6 +37,8 @@
 
 */
 
+#define DEFAULT_MESSAGE_WINDOW_FONT_SIZE 14
+
 class CustomLookAndFeel : public LookAndFeel_V2
 {
 public:
@@ -45,6 +47,8 @@ public:
 
     // ======== custom typeface getter: =============================
     Typeface::Ptr getTypefaceForFont(const Font& font);
+
+    Font getAlertWindowMessageFont() override;
 
     // ======== custom scroll bar methods: =============================
 

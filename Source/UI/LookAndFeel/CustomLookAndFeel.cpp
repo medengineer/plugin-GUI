@@ -143,6 +143,11 @@ Typeface::Ptr CustomLookAndFeel::getTypefaceForFont(const Font& font)
     //     return LookAndFeel::getTypefaceForFont(font);
 }
 
+Font CustomLookAndFeel::getAlertWindowMessageFont() 
+{
+    return Font(Font::getDefaultMonospacedFontName(), DEFAULT_MESSAGE_WINDOW_FONT_SIZE, 0);
+}
+
 //==================================================================
 // SCROLL BAR METHODS :
 //==================================================================
