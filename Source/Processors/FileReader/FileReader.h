@@ -75,7 +75,9 @@ public:
 
 private:
     Array<const EventChannel*> moduleEventChannels;
+    
     unsigned int count = 0;
+    bool simulatedEvent = false;
     
     void setActiveRecording (int index);
 
@@ -95,6 +97,7 @@ private:
 
     // for testing purposes only
     int counter;
+    
 
     ScopedPointer<FileSource> input;
 

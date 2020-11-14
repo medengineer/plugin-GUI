@@ -80,6 +80,7 @@ FileReader::FileReader()
 		}
 
 	}
+
 }
 
 
@@ -210,6 +211,8 @@ bool FileReader::isFileExtensionSupported (const String& ext) const
 
 bool FileReader::setFile (String fullpath)
 {
+
+    
     File file (fullpath);
 
     String ext = file.getFileExtension().toLowerCase().substring (1);
@@ -290,7 +293,6 @@ void FileReader::setActiveRecording (int index)
     static_cast<FileReaderEditor*> (getEditor())->setTotalTime (samplesToMilliseconds (currentNumSamples));
 	input->seekTo(startSample);
 
-   
 }
 
 
@@ -312,10 +314,19 @@ void FileReader::updateSettings()
          dataChannelArray[i]->setBitVolts(channelInfo[i].bitVolts);
          dataChannelArray[i]->setName(channelInfo[i].name);
      }
+    
+    std::cout << "Added event channel" << std::endl;
+    eventChannelArray.clear();
+    EventChannel* TTLchan = new EventChannel(EventChannel::TTL, 8, 1, currentSampleRate, this);
+    TTLchan->setName("File Reader events");
+    TTLchan->setDescription("Triggers whenever \"TTL\" is received on the port.");
+    TTLchan->setIdentifier("external.network.ttl");
+    eventChannelArray.add(TTLchan);
 }
 
 void FileReader::process (AudioSampleBuffer& buffer)
 {
+
     const int samplesNeededPerBuffer = int (float (buffer.getNumSamples()) * (getDefaultSampleRate() / m_sysSampleRate));
     m_samplesPerBuffer.set(samplesNeededPerBuffer);
     // FIXME: needs to account for the fact that the ratio might not be an exact
@@ -343,6 +354,18 @@ void FileReader::process (AudioSampleBuffer& buffer)
     
     bufferCacheWindow += 1;
     bufferCacheWindow %= BUFFER_WINDOW_CACHE_SIZE;
+
+    //Simulate events 
+    count++;
+    if (count % 10 == 0)
+    {
+        simulatedEvent = !simulatedEvent;
+        juce::uint8 ttlData = int(simulatedEvent) << 0;
+        std::cout << "Found event channel" << std::endl;
+        TTLEventPtr event = TTLEvent::createTTLEvent(eventChannelArray.getLast(), timestamp, &ttlData, sizeof(juce::uint8), 0);
+        std::cout << "Generated event" << std::endl;
+        addEvent(0, event, timestamp);
+    }
 }
 
 
