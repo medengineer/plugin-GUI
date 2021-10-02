@@ -77,7 +77,7 @@
     but if you define this value, you can override this to force it to be true or false.
 */
 #ifndef JUCE_FORCE_DEBUG
- //#define JUCE_FORCE_DEBUG 0
+ #define JUCE_FORCE_DEBUG 1
 #endif
 
 //==============================================================================
