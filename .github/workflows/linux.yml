@@ -22,12 +22,23 @@ jobs:
     - name: build
       run: |
         sudo apt update
-        cd Resources/Scripts
-        sudo ./install_linux_dependencies.sh
-        cd ../../Build && cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release ..
-        make all
-#    - name: test
-#      run: cd build && ctest
+        sudo ./Resources/Scripts/install_linux_dependencies.sh
+        #curl -L https://openephysgui.jfrog.io/artifactory/Release/linux/open-ephys-gha-test.zip --output open-ephys.zip
+        #unzip open-ephys.zip
+        cd Build
+        cmake -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE=Release ..
+        make open-ephys
+    - name: test
+      run: |
+        sudo apt install -y libssl-dev ruby-dev supercollider-server sc3-plugins-server alsa-utils jackd2 libjack-jackd2-dev libjack-jackd2-0 libasound2-dev librtmidi-dev pulseaudio-module-jack xvfb dbus-x11
+        export $(dbus-launch)
+        export DISPLAY=:99.0
+        export GDK_BACKEND=x11
+        sudo jackd -d dummy &
+        sleep 5
+        sudo xvfb-run -a bash -c './Build/Release/open-ephys' &
+        sleep 10
+        for pid in `ps ax | grep open-ephys | cut -d' ' -f1`; do kill -9 $pid; done
     - name: deploy_test
       if: github.ref == 'refs/heads/testing'
       env:

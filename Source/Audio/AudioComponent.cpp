@@ -30,6 +30,8 @@
 
 AudioComponent::AudioComponent() : isPlaying(false)
 {
+
+    LOGD("Looking for audio device...");
     bool initialized = false;
     while (!initialized)
     {
@@ -47,6 +49,8 @@ AudioComponent::AudioComponent() : isPlaying(false)
         }
         else
         {
+            LOGD("Audio device initialization error: ", error);
+            break;
             String titleMessage = String("Audio device initialization error");
             String contentMessage = String("There was a problem initializing the audio device:\n" + error);
             // this uses a bool since there are only two options
@@ -65,11 +69,14 @@ AudioComponent::AudioComponent() : isPlaying(false)
         }
     }
 
+    LOGD("Audio device initialized");
+
     AudioIODevice* aIOd = deviceManager.getCurrentAudioDevice();
 
     // the error string doesn't tell you if there's no audio device found...
     if (aIOd == 0)
     {
+        LOGD("No audio device found");
         String titleMessage = String("No audio device found");
         String contentMessage = String("Couldn't find an audio device. ") +
                                 String("Perhaps some other program has control of the default one.");
