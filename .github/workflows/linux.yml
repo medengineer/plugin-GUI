@@ -23,6 +23,7 @@ jobs:
       run: |
         sudo apt update
         sudo ./Resources/Scripts/install_linux_dependencies.sh
+        sudo apt install libjack-dev
         #curl -L https://openephysgui.jfrog.io/artifactory/Release/linux/open-ephys-gha-test.zip --output open-ephys.zip
         #unzip open-ephys.zip
         cd Build
