@@ -35,6 +35,8 @@ AudioComponent::AudioComponent() : isPlaying(false)
     bool initialized = false;
     while (!initialized)
     {
+        deviceManager.setCurrentAudioDeviceType("JACK",true);
+
         // if this is nonempty, we got an error
         String error = deviceManager.initialise(0,  // numInputChannelsNeeded
             2,  // numOutputChannelsNeeded
