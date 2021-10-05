@@ -35,8 +35,7 @@ jobs:
         export $(dbus-launch)
         export DISPLAY=:99.0
         export GDK_BACKEND=x11
-        export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket
-        sudo jackd -d dummy &
+        sudo jackd -d alsa &
         sleep 2
         sudo xvfb-run -a bash -c './Build/Release/open-ephys' &
         sleep 10
