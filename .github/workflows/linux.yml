@@ -36,7 +36,7 @@ jobs:
         export DISPLAY=:99.0
         export GDK_BACKEND=x11
         sudo jackd -d dummy &
-        sleep 5
+        jack_wait -w
         sudo xvfb-run -a bash -c './Build/Release/open-ephys' &
         sleep 10
         for pid in `ps ax | grep open-ephys | cut -d' ' -f1`; do kill -9 $pid; done
