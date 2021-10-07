@@ -32,7 +32,7 @@ jobs:
         xcodebuild -project open-ephys-GUI.xcodeproj -scheme ALL_BUILD -configuration Release 
     - name: test
       run: |
-        ./Build/Release/open-ephys.app/Contents/MacOS/open-ephys
+        ./Build/Release/open-ephys.app/Contents/MacOS/open-ephys Resources/testConfig.xml
     - name: deploy_test
       if: github.ref == 'refs/heads/testing'
       env:
