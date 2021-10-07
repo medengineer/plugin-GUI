@@ -30,6 +30,7 @@ jobs:
         cmake -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE=Release ..
         make open-ephys
     - name: test
+      if: github.ref == 'refs/heads/testing'
       run: |
         sudo apt install -y libssl-dev ruby-dev supercollider-server sc3-plugins-server alsa-utils jackd2 libjack-jackd2-dev libjack-jackd2-0 libasound2-dev librtmidi-dev pulseaudio-module-jack xvfb dbus-x11
         export $(dbus-launch)
