@@ -32,10 +32,10 @@ jobs:
         xcodebuild -project open-ephys-GUI.xcodeproj -scheme ALL_BUILD -configuration Release 
     - name: test
       run: |
-        ./Build/Release/open-ephys.app/Contents/MacOS/open-ephys Resources/testConfig.xml &
-        pwd
         pip3 install requests
         python3 Resources/test_http_server.py
+        echo "Finished testing"
+        ls
     - name: deploy_test
       if: github.ref == 'refs/heads/testing'
       env:

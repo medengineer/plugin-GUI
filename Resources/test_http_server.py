@@ -18,13 +18,13 @@ if system == 'Linux':
 elif system == 'Windows':
 	pass #TODO
 elif system == 'Darwin': #?
-	gui_dir= '/Users/pavelkulik/Projects/Allen/OpenEphys/plugin-GUI/Build/Release/open-ephys.app'
-	recording_dir= '/Users/pavelkulik/Projects/Allen/OpenEphys/plugin-GUI/Build/Release/'
+	gui_dir= '/Users/runner/work/plugin-GUI/plugin-GUI/Build/Release/open-ephys.app/Contents/MacOS/open-ephys /Users/runner/work/plugin-GUI/plugin-GUI/Resources/testConfig.xml'
+	recording_dir= '/Users/runner/work/plugin-GUI/plugin-GUI'
 
 try:
 
 	#Launch open-ephys
-	#p = subprocess.Popen(gui_dir, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
+	p = subprocess.Popen(gui_dir, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
 
 	#Wait for the GUI to launch
 	time.sleep(5)
@@ -34,15 +34,15 @@ try:
 	print("Connected to OpenEphys instance on " + address)
 
 	#Get the list of processors
-	resp = requests.get(address + '/api/processors')
-	data = resp.json()
-	processors = data['processors']
-	print(processors[0]['id'])
+	#resp = requests.get(address + '/api/processors')
+	#data = resp.json()
+	#processors = data['processors']
+	#print(processors[0]['id'])
 
 	#Configure the first processor (FileReader for now)
-	payload = { 'loadFile' : '<path-to-scrubber-test-file>' }
-	url = '/api/processors/' + str(processors[0]['id']) + '/config'
-	requests.put(address + url, data = json.dumps(payload))
+	#payload = { 'loadFile' : '<path-to-scrubber-test-file>' }
+	#url = '/api/processors/' + str(processors[0]['id']) + '/config'
+	#requests.put(address + url, data = json.dumps(payload))
 
 	time.sleep(1)
 
@@ -78,8 +78,7 @@ try:
 		#Wait 2 seconds (for visual confirmation recording has stopped)
 		time.sleep(2)
 
-	#os.killpg(os.getpgid(p.pid), signal.SIGTERM)
-
+	os.killpg(os.getpgid(p.pid), signal.SIGTERM)
 
 	## Check output files
 

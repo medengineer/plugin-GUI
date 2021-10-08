@@ -120,7 +120,7 @@
       </CHANNEL>
       <EVENTCHANNEL name="Messages" number="-1"/>
       <EDITOR isCollapsed="0" displayName="Record Node" Type="RecordNode">
-        <SETTINGS path="/Users/pavelkulik/Documents/Open Ephys" engine="1" recordEvents="1"
+        <SETTINGS path="/Users/runner/work/plugin-GUI/plugin-GUI" engine="1" recordEvents="1"
                   recordSpikes="1">
           <DATASTREAM stream_id="10010" isPrimary="1" sync_bit="0">
             <RECORDSTATE CH0="1" CH1="1" CH2="1" CH3="1" CH4="1" CH5="1" CH6="1" CH7="1"
@@ -136,7 +136,7 @@
                  audioInputDeviceName="" audioDeviceRate="48000.0" audioDeviceBufferSize="1024"/>
   </AUDIO>
   <GLOBAL_TIMESTAMP selected_index="0" selected_sub_index="0"/>
-  <CONTROLPANEL isOpen="0" recordPath="/Users/runner"
+  <CONTROLPANEL isOpen="0" recordPath="/Users/runner/work/plugin-GUI/plugin-GUI"
                 prependText="" appendText="" recordEngine="RAWBINARY"/>
   <AUDIOEDITOR isMuted="0" volume="50.0" noiseGate="0.0"/>
   <PROCESSORLIST>
