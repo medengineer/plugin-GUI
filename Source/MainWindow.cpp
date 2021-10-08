@@ -102,6 +102,7 @@ MainWindow::MainWindow(const File& fileToLoad)
 		}
 	}
 
+	shouldEnableHttpServer = true; //PK added for CI testing only
 	if (shouldEnableHttpServer) {
 		processorGraph->enableHttpServer();
 	}
