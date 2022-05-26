@@ -43,6 +43,10 @@ namespace BinarySource
 		bool isReady() override;
 
 	private:
+
+		int numActiveChannels;
+		Array<float> bitVolts;
+
 		bool Open(File file) override;
 		void fillRecordInfo() override;
 		void updateActiveRecord() override;
@@ -53,6 +57,9 @@ namespace BinarySource
 
 		File m_rootPath;
 		int64 m_samplePos;
+
+		int m_numChannels;
+		float m_bitVolts;
 		
 	};
 }

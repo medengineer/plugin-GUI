@@ -122,6 +122,12 @@ void BinaryFileSource::updateActiveRecord()
 {
 	m_dataFile = new MemoryMappedFile(m_dataFileArray[activeRecord.get()], MemoryMappedFile::readOnly);
 	m_samplePos = 0;
+
+	numActiveChannels = infoArray[activeRecord.get()].channels.size();
+
+	bitVolts.clear();
+	for (int i = 0; i < numActiveChannels; i++)
+		bitVolts.add(getChannelInfo(activeRecord.get(), i).bitVolts);
 }
 
 void BinaryFileSource::seekTo(int64 sample)
@@ -131,7 +137,6 @@ void BinaryFileSource::seekTo(int64 sample)
 
 int BinaryFileSource::readData(int16* buffer, int nSamples)
 {
-	int nChans = getActiveNumChannels();
 	int64 samplesToRead;
 
 	if (m_samplePos + nSamples > getActiveNumSamples())
@@ -143,21 +148,18 @@ int BinaryFileSource::readData(int16* buffer, int nSamples)
 		samplesToRead = nSamples;
 	}
 
-	int16* data = static_cast<int16*>(m_dataFile->getData()) + (m_samplePos * nChans);
+	int16* data = static_cast<int16*>(m_dataFile->getData()) + (m_samplePos * numActiveChannels);
 
-	memcpy(buffer, data, samplesToRead*nChans*sizeof(int16));
+	memcpy(buffer, data, samplesToRead*numActiveChannels*sizeof(int16));
     m_samplePos += samplesToRead;
 	return samplesToRead;
 }
 
 void BinaryFileSource::processChannelData(int16* inBuffer, float* outBuffer, int channel, int64 numSamples)
 {
-	int n = getActiveNumChannels();
-	float bitVolts = getChannelInfo(channel).bitVolts;
-
 	for (int i = 0; i < numSamples; i++)
 	{
-		*(outBuffer + i) = *(inBuffer + (n*i) + channel) * bitVolts;
+		*(outBuffer + i) = *(inBuffer + (numActiveChannels*i) + channel) * bitVolts[channel];
 	}
 }
 
