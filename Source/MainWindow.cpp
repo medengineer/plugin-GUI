@@ -54,6 +54,18 @@ MainWindow::MainWindow(const File& fileToLoad)
 	LOGC("CPU: ", SystemStats::getCpuModel(), " (", SystemStats::getNumCpus(), " core)");
 	std::cout << std::endl;
 
+
+	//Load a window with a webcam view using Juce library
+
+	//Create a window with a title
+	DocumentWindow window("Webcam", Colours::black, DocumentWindow::allButtons);
+
+	//Create a webcam component
+	CameraDevice* cameraDevice;
+	std::unique_ptr<Component> cameraPreviewComp;
+
+    cameraDevice = CameraDevice::openDevice(0);
+
 	setResizable(true,      // isResizable
 			false);   // useBottomCornerRisizer -- doesn't work very well
 

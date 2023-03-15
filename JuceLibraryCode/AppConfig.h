@@ -261,7 +261,7 @@
 // juce_video flags:
 
 #ifndef    JUCE_USE_CAMERA
- //#define JUCE_USE_CAMERA 0
+ #define JUCE_USE_CAMERA 1
 #endif
 
 #ifndef    JUCE_SYNC_VIDEO_VOLUME_WITH_OS_MEDIA_VOLUME
