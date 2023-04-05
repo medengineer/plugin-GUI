@@ -18,21 +18,25 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-2019]
+        os: [windows-2022]
     
     steps:
     - uses: actions/checkout@v1
     - name: configure
       run: |
         cd Build 
-        cmake -G "Visual Studio 16 2019" -A x64 ..
+        cmake -G "Visual Studio 17 2022" -A x64 -DBUILD_TESTS=1 ..
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.1
     - name: build
       run: |
-        msbuild Build/ALL_BUILD.vcxproj -p:Configuration=Release -p:Platform=x64
-#   - name: test
-#     run: cd build && ctest
+        cd Build
+        msbuild Tests/Processors/Processors_tests.vcxproj -p:Configuration=Debug -p:Platform=x64
+    - name: test
+      shell: powershell
+      run: |
+        cd Build
+        & .\TestBin\Processors\Debug\Processors_tests.exe
     - name: deploy_dev
       if: github.ref == 'refs/heads/development'
       env:
