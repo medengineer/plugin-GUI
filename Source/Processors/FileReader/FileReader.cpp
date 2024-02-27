@@ -103,20 +103,21 @@ void FileReader::registerParameters()
 {
     addPathParameter(Parameter::PROCESSOR_SCOPE, "selected_file", "Selected File", "File to load data from", "default", getSupportedExtensions(), false);
     addSelectedStreamParameter(Parameter::PROCESSOR_SCOPE, "active_stream", "Active Stream", "Currently active stream", {}, 0);
-    addTimeParameter(Parameter::PROCESSOR_SCOPE, "start_time", "Start Time", "Time to start playback");
-    addTimeParameter(Parameter::PROCESSOR_SCOPE, "end_time", "Stop Time", "Time to end playback");
+    addTimeParameter(Parameter::PROCESSOR_SCOPE, "start_time", "Start Time", "Time to start playback", "00:00:00");
+    addTimeParameter(Parameter::PROCESSOR_SCOPE, "end_time", "Stop Time", "Time to end playback", "00:00:04.999");
 }
 
 void FileReader::parameterValueChanged(Parameter* p)
 {
     if (p->getName() == "selected_file")
     {
+        //Check if file exists and is supported
         setFile(p->getValue());
     }
     else if (p->getName() == "active_stream")
     {
-        setActiveStream(p->getValue());
-        CoreServices::updateSignalChain (this);
+        bool resetPlayback = false;
+        setActiveStream(p->getValue(), resetPlayback);
     }
     else if (p->getName() == "start_time")
     {
@@ -213,11 +214,11 @@ bool FileReader::setFile (String fullpath, bool shouldUpdateSignalChain)
 		if (index > 1)
 		{
 			Plugin::FileSourceInfo sourceInfo = AccessClass::getPluginManager()->getFileSourceInfo(index - 2);
-			input = sourceInfo.creator();
+			input.reset(sourceInfo.creator());
 		}
 		else
 		{
-			input = createBuiltInFileSource(0);
+			input.reset(createBuiltInFileSource(0));
 		}
 		if (!input)
 		{
@@ -250,9 +251,9 @@ bool FileReader::setFile (String fullpath, bool shouldUpdateSignalChain)
         return false;
     }
 
-    // TOFIX: This sequence of parameter updates will need to be a single UndoableAction
+    gotNewFile = true;
 
-    setActiveStream (0);
+    setActiveStream (0, true);
 
     Array<String> streamNames;
     for (int i = 0; i < input->getNumRecords(); ++i)
@@ -263,30 +264,8 @@ bool FileReader::setFile (String fullpath, bool shouldUpdateSignalChain)
     activeStreamParam->setNextValue(0, false);
     parameterValueChanged(activeStreamParam);
 
-    TimeParameter* startTime = static_cast<TimeParameter*>(getParameter("start_time"));
-    startTime->getTimeValue()->setMaxTimeInMilliseconds(samplesToMilliseconds (input->getActiveNumSamples()));
-    //startTime->getTimeValue()->setTimeFromMilliseconds(samplesToMilliseconds (startSample));
-    //startTime->setNextValue(startTime->getTimeValue()->toString(), false);
-
-    TimeParameter* endTime = static_cast<TimeParameter*>(getParameter("end_time"));
-    endTime->getTimeValue()->setMaxTimeInMilliseconds(samplesToMilliseconds (input->getActiveNumSamples()));
-    endTime->getTimeValue()->setTimeFromMilliseconds(samplesToMilliseconds (currentNumTotalSamples));
-    endTime->setNextValue(endTime->getTimeValue()->toString(), false);
-
-    if (!headlessMode)
-    {
-        FileReaderEditor* ed = (FileReaderEditor*)editor.get();
-
-        int start = startTime->getTimeValue()->getTimeInMilliseconds();
-        int stop = endTime->getTimeValue()->getTimeInMilliseconds();
-        TimeParameter::TimeValue* duration = new TimeParameter::TimeValue(stop - start);
-        ed->showScrubInterface(false);
-        ed->enableScrubDrawer( duration->getTimeInMilliseconds() / 1000.0f >= 30.0f);
-    }
-    
-    gotNewFile = true;
-
     return true;
+
 }
 
 void FileReader::togglePlayback()
@@ -345,8 +324,11 @@ bool FileReader::isFileSupported (const String& fileName) const
     return supportedExtensions[ext] - 1 >= 0;
 }
 
-void FileReader::setActiveStream (int index)
+void FileReader::setActiveStream (int index, bool reset)
 {
+
+    //Resets the stream to the beginning if reset flag is true 
+    //If reset true, this means sample rate / num channels / num samples could all have changed
 
     if (!input) { return; }
 
@@ -357,23 +339,28 @@ void FileReader::setActiveStream (int index)
     currentNumTotalSamples  = input->getActiveNumSamples();
     currentSampleRate       = input->getActiveSampleRate();
 
-    currentSample           = 0;
-    startSample             = 0;
-    stopSample              = currentNumTotalSamples;
-    bufferCacheWindow       = 0;
-    loopCount               = 0;
+    //TODO: Also need to check if currentSample
+    if (reset)
+    {
+        startSample = 0;
+        stopSample = currentNumTotalSamples;
+        bufferCacheWindow = 0;
+        loopCount = 0;
+
+        TimeParameter* startTime = static_cast<TimeParameter*>(getParameter("start_time"));
+        startTime->getTimeValue()->setTimeFromMilliseconds(0);
+        startTime->getTimeValue()->setMaxTimeInMilliseconds(samplesToMilliseconds (currentNumTotalSamples));
+        startTime->setNextValue(startTime->getTimeValue()->toString(), false);
+
+        TimeParameter* endTime = static_cast<TimeParameter*>(getParameter("end_time"));
+        endTime->getTimeValue()->setTimeFromMilliseconds(samplesToMilliseconds (currentNumTotalSamples));
+        endTime->getTimeValue()->setMaxTimeInMilliseconds(samplesToMilliseconds (currentNumTotalSamples));
+        endTime->setNextValue(endTime->getTimeValue()->toString(), false);
+    }
 
     channelInfo.clear();
     for (int i = 0; i < currentNumChannels; ++i)
            channelInfo.add (input->getChannelInfo (index, i));
-
-    TimeParameter* endTime = static_cast<TimeParameter*>(getParameter("end_time"));
-
-    if (endTime->getTimeValue()->getTimeInMilliseconds() == 0)
-    {
-        endTime->getTimeValue()->setTimeFromMilliseconds(samplesToMilliseconds (currentNumTotalSamples));
-        endTime->setNextValue(endTime->getTimeValue()->toString(), false);
-    }
 	
     input->seekTo(startSample);
     
