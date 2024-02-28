@@ -104,7 +104,7 @@ void FileReader::registerParameters()
     addPathParameter(Parameter::PROCESSOR_SCOPE, "selected_file", "Selected File", "File to load data from", "default", getSupportedExtensions(), false);
     addSelectedStreamParameter(Parameter::PROCESSOR_SCOPE, "active_stream", "Active Stream", "Currently active stream", {}, 0);
     addTimeParameter(Parameter::PROCESSOR_SCOPE, "start_time", "Start Time", "Time to start playback", "00:00:00");
-    addTimeParameter(Parameter::PROCESSOR_SCOPE, "end_time", "Stop Time", "Time to end playback", "00:00:04.999");
+    addTimeParameter(Parameter::PROCESSOR_SCOPE, "end_time", "Stop Time", "Time to end playback", "00:00:00");
 }
 
 void FileReader::parameterValueChanged(Parameter* p)
@@ -339,6 +339,16 @@ void FileReader::setActiveStream (int index, bool reset)
     currentNumTotalSamples  = input->getActiveNumSamples();
     currentSampleRate       = input->getActiveSampleRate();
 
+    TimeParameter* startTime = static_cast<TimeParameter*>(getParameter("start_time"));
+    startTime->getTimeValue()->setMaxTimeInMilliseconds(samplesToMilliseconds (currentNumTotalSamples));
+
+    TimeParameter* endTime = static_cast<TimeParameter*>(getParameter("end_time"));
+    endTime->getTimeValue()->setMaxTimeInMilliseconds(samplesToMilliseconds (currentNumTotalSamples));
+
+    //Check if currentSample is within bounds of new stream
+    if (currentSample > currentNumTotalSamples)
+        reset = true;
+
     //TODO: Also need to check if currentSample
     if (reset)
     {
@@ -347,14 +357,10 @@ void FileReader::setActiveStream (int index, bool reset)
         bufferCacheWindow = 0;
         loopCount = 0;
 
-        TimeParameter* startTime = static_cast<TimeParameter*>(getParameter("start_time"));
         startTime->getTimeValue()->setTimeFromMilliseconds(0);
-        startTime->getTimeValue()->setMaxTimeInMilliseconds(samplesToMilliseconds (currentNumTotalSamples));
         startTime->setNextValue(startTime->getTimeValue()->toString(), false);
 
-        TimeParameter* endTime = static_cast<TimeParameter*>(getParameter("end_time"));
         endTime->getTimeValue()->setTimeFromMilliseconds(samplesToMilliseconds (currentNumTotalSamples));
-        endTime->getTimeValue()->setMaxTimeInMilliseconds(samplesToMilliseconds (currentNumTotalSamples));
         endTime->setNextValue(endTime->getTimeValue()->toString(), false);
     }
 
