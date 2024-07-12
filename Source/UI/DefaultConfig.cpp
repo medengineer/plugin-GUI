@@ -298,4 +298,6 @@ bool DefaultConfigComponent::keyPressed (const KeyPress& key, Component* origina
         goButton->triggerClick();
         return true;
     }
+
+    return false;
 }

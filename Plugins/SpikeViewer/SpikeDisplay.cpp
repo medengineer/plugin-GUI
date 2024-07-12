@@ -249,6 +249,8 @@ bool SpikeDisplay::getMonitorStateForPlot (int plotNum)
 {
     if (spikePlots.size() > plotNum)
         return spikePlots[plotNum]->getMonitorState();
+
+    return false;
 }
 
 void SpikeDisplay::setMonitorStateForPlot (int plotNum, bool state)

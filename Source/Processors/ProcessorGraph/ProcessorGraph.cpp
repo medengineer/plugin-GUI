@@ -639,9 +639,10 @@ bool ProcessorGraph::checkForNewRootNodes (GenericProcessor* processor,
                                 createEmptyProcessor (p);
                             else
                             {
+                                /*
                                 while (sourceB->getSourceNode() != nullptr)
                                     sourceB = sourceA->getSourceNode();
-
+                                */
                                 createEmptyProcessor (p, rootNodes.indexOf (sourceB));
                             }
                         }
