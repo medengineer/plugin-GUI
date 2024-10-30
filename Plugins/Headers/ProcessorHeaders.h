@@ -33,3 +33,30 @@ Should be included in the source files which declare a processor class.
 #include "../../Source/TestableExport.h"
 #include "../../Source/Utils/BroadcastParser.h"
 #include "DspLib.h"
+
+#ifndef PROCESSOR_NAME
+    #define PROCESSOR_NAME "Unknown"
+#endif
+
+#define LOGA(...) \
+    getOELogger().LOGFile("[" PROCESSOR_NAME "][action] ", __VA_ARGS__)
+
+#define LOGB(...) \
+    getOELogger().LOGFile("[" PROCESSOR_NAME "][buffer] ", __VA_ARGS__)
+
+#define LOGC(...) \
+    getOELogger().LOGConsole("[" PROCESSOR_NAME "] ", __VA_ARGS__)
+
+#ifdef DEBUG
+    #define LOGD(...) \
+        getOELogger().LOGConsole("[" PROCESSOR_NAME "][debug] ", __VA_ARGS__)
+#else
+    #define LOGD(...) \
+        getOELogger().LOGFile("[" PROCESSOR_NAME "][debug] ", __VA_ARGS__)
+#endif
+
+#define LOGDD(...) \
+    getOELogger().LOGFile("[" PROCESSOR_NAME "][ddebug] ", __VA_ARGS__)
+
+#define LOGE(...) \
+    getOELogger().LOGError("[" PROCESSOR_NAME "] ***ERROR*** ", __VA_ARGS__)

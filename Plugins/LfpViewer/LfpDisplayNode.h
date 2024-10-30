@@ -27,6 +27,7 @@
 #include "DisplayBuffer.h"
 #include "LfpDisplayCanvas.h"
 #include "LfpDisplayEditor.h"
+#include "LfpViewerLogger.h"
 #include <ProcessorHeaders.h>
 
 #include <map>
