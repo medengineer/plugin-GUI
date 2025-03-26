@@ -585,10 +585,11 @@ void FileReader::updateSettings()
     input->seekTo (startSample);
     currentSample = startSample;
 
-    /* Pre-fills the front buffer with a blocking read */
+    /* Pre-fills both buffers with blocking reads */
     readAndFillBufferCache (bufferA);
+    readAndFillBufferCache (bufferB);
 
-    readBuffer = &bufferB;
+    readBuffer = &bufferA;  // Start with bufferA since it's already filled
     bufferCacheWindow = 0;
     m_shouldFillBackBuffer.set (false);
 
@@ -617,10 +618,11 @@ void FileReader::checkAudioDevice()
         input->seekTo (startSample);
         currentSample = startSample;
 
-        /* Pre-fills the front buffer with a blocking read */
+        /* Pre-fills both buffers with blocking reads */
         readAndFillBufferCache (bufferA);
+        readAndFillBufferCache (bufferB);
 
-        readBuffer = &bufferB;
+        readBuffer = &bufferA;  // Start with bufferA since it's already filled
         bufferCacheWindow = 0;
         m_shouldFillBackBuffer.set (false);
     }
