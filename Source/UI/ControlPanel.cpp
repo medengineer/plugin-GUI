@@ -29,6 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "UIComponent.h"
 #include <math.h>
 #include <stdio.h>
+#include "../Utils/Utils.h"
 
 #include "LookAndFeel/CustomLookAndFeel.h"
 
@@ -456,11 +457,14 @@ ControlPanel::ControlPanel (ProcessorGraph* graph_, AudioComponent* audio_, bool
 {
     AccessClass::setControlPanel (this);
 
-    recordButton = std::make_unique<RecordButton>();
-    recordButton->addListener (this);
+    if (! isConsoleApp)
+    {
+        recordButton = std::make_unique<RecordButton>();
+        recordButton->addListener (this);
 
-    playButton = std::make_unique<PlayButton>();
-    playButton->addListener (this);
+        playButton = std::make_unique<PlayButton>();
+        playButton->addListener (this);
+    }
 
     const File dataDirectory = CoreServices::getDefaultUserSaveDirectory();
 
@@ -546,12 +550,26 @@ void ControlPanel::setRecordingState (bool t, bool force)
 {
     forceRecording = force;
 
-    recordButton->setToggleState (t, sendNotification);
+    recordingState = t;
+
+    if (! isConsoleApp)
+        recordButton->setToggleState (t, sendNotification);
+    else
+    {
+        if (t) {
+            if (acquisitionState)
+                startRecording();
+            else
+                startAcquisition (true);
+        }
+        else
+            stopRecording();
+    }
 }
 
 bool ControlPanel::getRecordingState()
 {
-    return recordButton->getToggleState();
+    return recordingState;
 }
 
 int64 ControlPanel::getRecordingTime() const
@@ -572,20 +590,35 @@ File ControlPanel::getRecordingParentDirectory()
 
 bool ControlPanel::getAcquisitionState()
 {
-    return playButton->getToggleState();
+    return acquisitionState;
 }
 
 void ControlPanel::setAcquisitionState (bool state)
 {
-    playButton->setToggleState (state, sendNotification);
+    if (state && ! acquisitionState)
+    {
+        startAcquisition();
+        acquisitionState = true;
+    }
+    else if (! state && acquisitionState)
+    {
+        stopAcquisition();
+        acquisitionState = false;
+    }
 }
 
 void ControlPanel::startAcquisition (bool recordingShouldAlsoStart)
 {
     if (! audio->checkForDevice())
     {
-        playButton->setToggleState (false, dontSendNotification);
-        recordButton->setToggleState (false, dontSendNotification);
+        acquisitionState = false;
+        recordingState = false;
+
+        if (! isConsoleApp)
+        {
+            playButton->setToggleState (false, dontSendNotification);
+            recordButton->setToggleState (false, dontSendNotification);
+        }
 
         String errorMsg = "No output device found. Unable to start acquisition.";
         LOGE (errorMsg);
@@ -606,8 +639,14 @@ void ControlPanel::startAcquisition (bool recordingShouldAlsoStart)
 
     if (audio->getSampleRate() < 44100)
     {
-        playButton->setToggleState (false, dontSendNotification);
-        recordButton->setToggleState (false, dontSendNotification);
+        acquisitionState = false;
+        recordingState = false;
+
+        if (! isConsoleApp)
+        {
+            playButton->setToggleState (false, dontSendNotification);
+            recordButton->setToggleState (false, dontSendNotification);
+        }
 
         String errorMsg = "Sample rate too low. Unable to start acquisition.";
         LOGE (errorMsg);
@@ -638,10 +677,16 @@ void ControlPanel::startAcquisition (bool recordingShouldAlsoStart)
 
         graph->startAcquisition(); // inform processors that acquisition will start
 
+        acquisitionState = true;
+
         if (recordingShouldAlsoStart)
         {
             startRecording();
-            playButton->setToggleState (true, dontSendNotification);
+            recordingState = true;
+            if (! isConsoleApp)
+            {
+                playButton->setToggleState (true, dontSendNotification);
+            }
         }
 
         if (! isConsoleApp)
@@ -667,7 +712,7 @@ void ControlPanel::startAcquisition (bool recordingShouldAlsoStart)
 
 void ControlPanel::stopAcquisition()
 {
-    if (recordButton->getToggleState())
+    if (recordingState)
     {
         stopRecording();
     }
@@ -675,6 +720,8 @@ void ControlPanel::stopAcquisition()
     graph->stopAcquisition();
 
     audio->endCallbacks();
+
+    acquisitionState = false;
 
     if (! isConsoleApp)
     {
@@ -984,9 +1031,12 @@ void ControlPanel::startRecording()
 
     // filenameText->setColour(Label::textColourId, Colours::black);
 
-    recordButton->updateImages (true);
+    if (! isConsoleApp)
+    {
+        recordButton->updateImages (true);
 
-    showHideRecordingOptionsButton->setCustomBackground (true, Colour (255, 0, 0));
+        showHideRecordingOptionsButton->setCustomBackground (true, Colour (255, 0, 0));
+    }
 
     if (newDirectoryButton->getToggleState()) // new directory is required
     {
@@ -1005,6 +1055,8 @@ void ControlPanel::startRecording()
 
     graph->setRecordState (true);
 
+    recordingState = true;
+
     repaint();
 }
 
@@ -1013,6 +1065,8 @@ void ControlPanel::stopRecording()
     hasRecorded = true;
 
     graph->setRecordState (false); // turn off recording in processor graph
+
+    recordingState = false;
 
     clock->stopRecording();
 
@@ -1028,10 +1082,11 @@ void ControlPanel::stopRecording()
     }
     newDirectoryButton->setToggleState(newDirectoryNeeded, dontSendNotification);
 
-    recordButton->updateImages (false);
-    showHideRecordingOptionsButton->setCustomBackground (false, findColour (ThemeColours::windowBackground));
-
-    recordButton->setToggleState (false, dontSendNotification);
+    if (! isConsoleApp)
+    {
+        recordButton->updateImages (false);
+        showHideRecordingOptionsButton->setCustomBackground (false, findColour (ThemeColours::windowBackground));
+    }
 
     repaint();
 }
@@ -1109,7 +1164,7 @@ void ControlPanel::buttonClicked (Button* button)
 
     if (button == playButton.get())
     {
-        if (playButton->getToggleState())
+        if (! acquisitionState)
         {
             startAcquisition();
         }
@@ -1129,6 +1184,7 @@ void ControlPanel::buttonClicked (Button* button)
             {
                 CoreServices::sendStatusMessage ("Insert at least one Record Node to start recording.");
                 recordButton->setToggleState (false, dontSendNotification);
+                recordingState = false;
                 return;
             }
             else
@@ -1136,7 +1192,7 @@ void ControlPanel::buttonClicked (Button* button)
                 if (! graph->allRecordNodesAreSynchronized() && ! forceRecording)
                 {
                     recordButton->setToggleState (false, dontSendNotification);
-
+                    recordingState = false;
                     int response = AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
                                                                  "Data streams not synchronized",
                                                                  "One or more data streams are not yet synchronized within "
@@ -1151,11 +1207,12 @@ void ControlPanel::buttonClicked (Button* button)
                     }
 
                     recordButton->setToggleState (true, dontSendNotification);
+                    recordingState = true;
                     forceRecording = false;
                 }
             }
 
-            if (playButton->getToggleState())
+            if (acquisitionState)
             {
                 startRecording();
             }
@@ -1236,7 +1293,7 @@ void ControlPanel::timerCallback()
 
 void ControlPanel::refreshMeters()
 {
-    if (playButton->getToggleState())
+    if (acquisitionState)
     {
         cpuMeter->updateCPU (audio->deviceManager.getCpuUsage());
     }

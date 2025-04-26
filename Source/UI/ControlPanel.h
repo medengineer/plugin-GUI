@@ -545,6 +545,8 @@ private:
 
     String recordingDirectoryName;
     bool newDirectoryNeeded = true;
+    bool acquisitionState = false;
+    bool recordingState = false;
 };
 
 #endif // __CONTROLPANEL_H_AD81E528__
