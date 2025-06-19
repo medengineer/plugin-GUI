@@ -1,16 +1,9 @@
 name: Build and Run Tests
 
 on:
-  pull_request:
-    paths:
-      - 'JuceLibraryCode/**'
-      - 'Plugins/**'
-      - 'Resources/**'
-      - 'Source/**'
-      - 'CMakeLists.txt'
-      - 'HelperFunctions.cmake'
+  push:
     branches:
-      - 'main'
+      - 'development'
   workflow_dispatch:
 
 jobs:
@@ -27,6 +20,10 @@ jobs:
         sudo apt update
         cd Resources/Scripts
         sudo ./install_linux_dependencies.sh
+        sudo apt install -y pulseaudio
+        pulseaudio --start
+        pactl load-module module-null-sink sink_name=VirtualOutput
+        pactl list short sinks
         cd ../../Build && cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON ..
         make -j8
     - name: run tests
