@@ -66,7 +66,7 @@ void LatencyMeter::update (const Array<const DataStream*>& dataStreams)
 
 void LatencyMeter::setLatestLatency (std::map<uint16, juce::int64>& processStartTimes, bool headlessMode)
 {
-    if (counter % 10 == 0) // update latency estimate every 10 process blocks
+    if (counter % 20 == 0) // update latency estimate every 20 process blocks
     {
         auto currentTime = juce::Time::getHighResolutionTicks();
 
