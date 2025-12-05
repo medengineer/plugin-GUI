@@ -180,7 +180,7 @@ public:
 
     const String getApplicationName()
     {
-        return "Open Ephys GUI";
+        return "Open Ephys GUI!";
     }
 
     const String getApplicationVersion()
