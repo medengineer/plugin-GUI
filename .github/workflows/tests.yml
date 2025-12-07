@@ -93,28 +93,100 @@ jobs:
         with:
           path: Build
           key: windows-build-${{ steps.source-hash.outputs.hash }}
+      - name: Get plugin commit hashes
+        id: plugin-hashes
+        shell: bash
+        run: |
+          data_format_hash=$(git ls-remote https://github.com/open-ephys-plugins/open-ephys-data-format.git main | cut -f1 | cut -c1-16)
+          hdf5_hash=$(git ls-remote https://github.com/open-ephys-plugins/OpenEphysHDF5Lib.git main | cut -f1 | cut -c1-16)
+          nwb_hash=$(git ls-remote https://github.com/open-ephys-plugins/nwb-format.git main | cut -f1 | cut -c1-16)
+          echo "data-format=$data_format_hash" >> $GITHUB_OUTPUT
+          echo "hdf5=$hdf5_hash" >> $GITHUB_OUTPUT
+          echo "nwb=$nwb_hash" >> $GITHUB_OUTPUT
+      - name: Restore open-ephys-data-format cache
+        uses: actions/cache@v4
+        id: cache-data-format
+        with:
+          path: C:\OEPlugins\open-ephys-data-format
+          key: plugin-data-format-${{ steps.plugin-hashes.outputs.data-format }}
+          restore-keys: |
+            plugin-data-format-
+      - name: Build open-ephys-data-format
+        if: steps.cache-data-format.outputs.cache-hit != 'true'
+        shell: powershell
+        run: |
+          New-Item -Path 'C:\OEPlugins' -ItemType Directory -Force
+          git clone --branch main https://github.com/open-ephys-plugins/open-ephys-data-format.git C:\OEPlugins\open-ephys-data-format
+          cd C:\OEPlugins\open-ephys-data-format\Build
+          cmake -G "Visual Studio 17 2022" -A x64 ..
+          msbuild ALL_BUILD.vcxproj -p:Configuration=Release -p:Platform=x64 -m
       - name: Install open-ephys-data-format
         shell: powershell
         run: |
-          New-Item -Path '..\OEPlugins' -ItemType Directory
-          git clone --branch main https://github.com/open-ephys-plugins/open-ephys-data-format.git ..\OEPlugins\open-ephys-data-format
-          cd ..\OEPlugins\open-ephys-data-format\Build
-          cmake -G "Visual Studio 17 2022" -A x64 ..
+          cd C:\OEPlugins\open-ephys-data-format\Build
           msbuild INSTALL.vcxproj -p:Configuration=Release -p:Platform=x64
+      - name: Save open-ephys-data-format cache
+        if: steps.cache-data-format.outputs.cache-hit != 'true'
+        uses: actions/cache@v4
+        with:
+          path: C:\OEPlugins\open-ephys-data-format
+          key: plugin-data-format-${{ steps.plugin-hashes.outputs.data-format }}
+      - name: Restore OpenEphysHDF5Lib cache
+        uses: actions/cache@v4
+        id: cache-hdf5
+        with:
+          path: C:\OEPlugins\OpenEphysHDF5Lib
+          key: plugin-hdf5-${{ steps.plugin-hashes.outputs.hdf5 }}
+          restore-keys: |
+            plugin-hdf5-
+      - name: Build OpenEphysHDF5Lib
+        if: steps.cache-hdf5.outputs.cache-hit != 'true'
+        shell: powershell
+        run: |
+          New-Item -Path 'C:\OEPlugins' -ItemType Directory -Force
+          git clone --branch main https://github.com/open-ephys-plugins/OpenEphysHDF5Lib.git C:\OEPlugins\OpenEphysHDF5Lib
+          cd C:\OEPlugins\OpenEphysHDF5Lib\Build
+          cmake -G "Visual Studio 17 2022" -A x64 ..
+          msbuild ALL_BUILD.vcxproj -p:Configuration=Release -p:Platform=x64 -m
       - name: Install OpenEphysHDF5Lib
         shell: powershell
         run: |
-          git clone --branch main https://github.com/open-ephys-plugins/OpenEphysHDF5Lib.git ..\OEPlugins\OpenEphysHDF5Lib
-          cd ..\OEPlugins\OpenEphysHDF5Lib\Build
-          cmake -G "Visual Studio 17 2022" -A x64 ..
+          cd C:\OEPlugins\OpenEphysHDF5Lib\Build
           msbuild INSTALL.vcxproj -p:Configuration=Release -p:Platform=x64
+      - name: Save OpenEphysHDF5Lib cache
+        if: steps.cache-hdf5.outputs.cache-hit != 'true'
+        uses: actions/cache@v4
+        with:
+          path: C:\OEPlugins\OpenEphysHDF5Lib
+          key: plugin-hdf5-${{ steps.plugin-hashes.outputs.hdf5 }}
+      - name: Restore nwb-format cache
+        uses: actions/cache@v4
+        id: cache-nwb
+        with:
+          path: C:\OEPlugins\nwb-format
+          key: plugin-nwb-${{ steps.plugin-hashes.outputs.nwb }}
+          restore-keys: |
+            plugin-nwb-
+      - name: Build nwb-format
+        if: steps.cache-nwb.outputs.cache-hit != 'true'
+        shell: powershell
+        run: |
+          New-Item -Path 'C:\OEPlugins' -ItemType Directory -Force
+          git clone --branch main https://github.com/open-ephys-plugins/nwb-format.git C:\OEPlugins\nwb-format
+          cd C:\OEPlugins\nwb-format\Build
+          cmake -G "Visual Studio 17 2022" -A x64 ..
+          msbuild ALL_BUILD.vcxproj -p:Configuration=Release -p:Platform=x64 -m
       - name: Install nwb-format
         shell: powershell
         run: |
-          git clone --branch main https://github.com/open-ephys-plugins/nwb-format.git ..\OEPlugins\nwb-format
-          cd ..\OEPlugins\nwb-format\Build
-          cmake -G "Visual Studio 17 2022" -A x64 ..
+          cd C:\OEPlugins\nwb-format\Build
           msbuild INSTALL.vcxproj -p:Configuration=Release -p:Platform=x64
+      - name: Save nwb-format cache
+        if: steps.cache-nwb.outputs.cache-hit != 'true'
+        uses: actions/cache@v4
+        with:
+          path: C:\OEPlugins\nwb-format
+          key: plugin-nwb-${{ steps.plugin-hashes.outputs.nwb }}
       - name: Install test-suite
         shell: powershell
         run: |
