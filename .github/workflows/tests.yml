@@ -61,16 +61,38 @@ jobs:
           C:\Scream\Install\helpers\devcon install Scream.inf *Scream
       - name: Show audio device
         run: Get-CimInstance Win32_SoundDevice | fl *
+      - name: Get source hash
+        id: source-hash
+        run: |
+          hash=$(git ls-tree -r HEAD --name-only Source Plugins JuceLibraryCode CMakeLists.txt HelperFunctions.cmake | git hash-object --stdin-paths | cut -c1-16)
+          echo "hash=$hash" >> $GITHUB_OUTPUT
+        shell: bash
+      - name: Restore build cache
+        uses: actions/cache@v4
+        id: build-cache
+        with:
+          path: Build
+          key: windows-build-${{ steps.source-hash.outputs.hash }}
+          restore-keys: |
+            windows-build-
       - name: configure
+        if: steps.build-cache.outputs.cache-hit != 'true'
         run: |
           cd Build 
           cmake -G "Visual Studio 17 2022" -A x64 ..
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.0.2
       - name: build
+        if: steps.build-cache.outputs.cache-hit != 'true'
         run: |
           cd Build
           msbuild ALL_BUILD.vcxproj -p:Configuration=Release -p:Platform=x64 -m
+      - name: Save build cache
+        if: steps.build-cache.outputs.cache-hit != 'true'
+        uses: actions/cache@v4
+        with:
+          path: Build
+          key: windows-build-${{ steps.source-hash.outputs.hash }}
       - name: Install open-ephys-data-format
         shell: powershell
         run: |
