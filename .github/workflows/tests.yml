@@ -115,6 +115,10 @@ jobs:
           Stop-Process -Id $process.Id -Force
         env:
           OE_WINDOWS_GITHUB_RECORD_PATH: C:\open-ephys\data
+      - name: Display Full Traceback
+        if: failure()
+        shell: powershell
+        run: Get-Content "python_output.log"
       - name: Set timestamp
         shell: powershell
         id: timestamp
