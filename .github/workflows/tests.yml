@@ -64,7 +64,7 @@ jobs:
       - name: Get source hash
         id: source-hash
         run: |
-          hash=$(git ls-tree -r HEAD --name-only Source Plugins JuceLibraryCode CMakeLists.txt HelperFunctions.cmake | git hash-object --stdin-paths | cut -c1-16 | tr -d '\n')
+          hash=$(git ls-tree -r HEAD --name-only Source Plugins JuceLibraryCode CMakeLists.txt HelperFunctions.cmake | sha256sum | cut -d' ' -f1 | cut -c1-16)
           echo "hash=$hash" >> $GITHUB_OUTPUT
         shell: bash
       - name: Restore build cache
