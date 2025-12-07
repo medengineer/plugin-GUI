@@ -64,7 +64,7 @@ jobs:
       - name: Get source hash
         id: source-hash
         run: |
-          hash=$(git ls-tree -r HEAD --name-only Source Plugins JuceLibraryCode CMakeLists.txt HelperFunctions.cmake | git hash-object --stdin-paths | cut -c1-16)
+          hash=$(git ls-tree -r HEAD --name-only Source Plugins JuceLibraryCode CMakeLists.txt HelperFunctions.cmake | git hash-object --stdin-paths | cut -c1-16 | tr -d '\n')
           echo "hash=$hash" >> $GITHUB_OUTPUT
         shell: bash
       - name: Restore build cache
@@ -97,9 +97,9 @@ jobs:
         id: plugin-hashes
         shell: bash
         run: |
-          data_format_hash=$(git ls-remote https://github.com/open-ephys-plugins/open-ephys-data-format.git main | cut -f1 | cut -c1-16)
-          hdf5_hash=$(git ls-remote https://github.com/open-ephys-plugins/OpenEphysHDF5Lib.git main | cut -f1 | cut -c1-16)
-          nwb_hash=$(git ls-remote https://github.com/open-ephys-plugins/nwb-format.git main | cut -f1 | cut -c1-16)
+          data_format_hash=$(git ls-remote https://github.com/open-ephys-plugins/open-ephys-data-format.git main | cut -f1 | cut -c1-16 | tr -d '\n')
+          hdf5_hash=$(git ls-remote https://github.com/open-ephys-plugins/OpenEphysHDF5Lib.git main | cut -f1 | cut -c1-16 | tr -d '\n')
+          nwb_hash=$(git ls-remote https://github.com/open-ephys-plugins/nwb-format.git main | cut -f1 | cut -c1-16 | tr -d '\n')
           echo "data-format=$data_format_hash" >> $GITHUB_OUTPUT
           echo "hdf5=$hdf5_hash" >> $GITHUB_OUTPUT
           echo "nwb=$nwb_hash" >> $GITHUB_OUTPUT
@@ -217,7 +217,7 @@ jobs:
         shell: powershell
         id: timestamp
         run: |
-          $timestamp = Get-Date -Format 'yyyy_MM_dd_HH_mm_ss'
+          $timestamp = (Get-Date -Format 'yyyy_MM_dd_HH_mm_ss').Trim()
           "timestamp=$timestamp" >> $env:GITHUB_OUTPUT
       - name: Upload test results
         uses: actions/upload-artifact@v4
