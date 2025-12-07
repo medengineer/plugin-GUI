@@ -66,6 +66,9 @@ jobs:
         run: |
           hash=$(git ls-tree -r HEAD --name-only Source Plugins JuceLibraryCode CMakeLists.txt HelperFunctions.cmake | sha256sum | cut -d' ' -f1 | cut -c1-16)
           echo "hash=$hash" >> $GITHUB_OUTPUT
+          echo "Source hash: $hash"
+          echo "Cache key: windows-build-$hash"
+          echo "Commit: $(git rev-parse HEAD)"
         shell: bash
       - name: Restore build cache
         uses: actions/cache@v4
@@ -86,6 +89,17 @@ jobs:
         run: |
           cd Build
           msbuild ALL_BUILD.vcxproj -p:Configuration=Release -p:Platform=x64 -m
+      - name: Verify Build directory before caching
+        if: steps.build-cache.outputs.cache-hit != 'true'
+        shell: powershell
+        run: |
+          if (Test-Path "Build\Release\open-ephys.exe") {
+            Write-Host "Build artifact found: Build\Release\open-ephys.exe"
+            Get-Item "Build\Release\open-ephys.exe" | Select-Object FullName, Length, LastWriteTime
+          } else {
+            Write-Host "WARNING: Build artifact not found!"
+            Get-ChildItem -Path Build -Recurse -File | Select-Object FullName -First 10
+          }
       - name: Save build cache
         if: steps.build-cache.outputs.cache-hit != 'true'
         uses: actions/cache@v4
