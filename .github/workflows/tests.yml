@@ -110,7 +110,7 @@ jobs:
           Write-Host "Started open-ephys process with ID: $($process.Id)"
           Start-Sleep -Seconds 10
           Write-Host "Starting Python script..."
-          python run_all.py 2>&1 | Tee-Object -FilePath "python_output.log"
+          python run_all.py *>&1 | Out-File -FilePath "python_output.log"
           Write-Host "Python script completed. Output saved to python_output.log"
           Stop-Process -Id $process.Id -Force
         env:
