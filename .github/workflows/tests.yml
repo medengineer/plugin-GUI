@@ -128,16 +128,20 @@ jobs:
         if: steps.cache-data-format.outputs.cache-hit != 'true'
         shell: powershell
         run: |
-          New-Item -Path 'OEPlugins' -ItemType Directory -Force
-          git clone --branch main https://github.com/open-ephys-plugins/open-ephys-data-format.git OEPlugins\open-ephys-data-format
-          cd OEPlugins\open-ephys-data-format\Build
-          $mainRepoPath = (Resolve-Path "..\..\").Path
-          cmake -G "Visual Studio 17 2022" -A x64 -DPLUGIN_HEADER_PATH="$mainRepoPath\Plugins\Headers" -DJUCE_DIRECTORY="$mainRepoPath\JuceLibraryCode" ..
+          $workspace = $env:GITHUB_WORKSPACE
+          $pluginsDir = Join-Path $workspace "OEPlugins"
+          New-Item -Path $pluginsDir -ItemType Directory -Force
+          $pluginDir = Join-Path $pluginsDir "open-ephys-data-format"
+          git clone --branch main https://github.com/open-ephys-plugins/open-ephys-data-format.git $pluginDir
+          $buildDir = Join-Path $pluginDir "Build"
+          cd $buildDir
+          cmake -G "Visual Studio 17 2022" -A x64 -DPLUGIN_HEADER_PATH="$workspace\Plugins\Headers" -DJUCE_DIRECTORY="$workspace\JuceLibraryCode" ..
           msbuild ALL_BUILD.vcxproj -p:Configuration=Release -p:Platform=x64 -m
       - name: Install open-ephys-data-format
         shell: powershell
         run: |
-          cd OEPlugins\open-ephys-data-format\Build
+          $workspace = $env:GITHUB_WORKSPACE
+          cd "$workspace\OEPlugins\open-ephys-data-format\Build"
           msbuild INSTALL.vcxproj -p:Configuration=Release -p:Platform=x64
       - name: Save open-ephys-data-format cache
         if: steps.cache-data-format.outputs.cache-hit != 'true'
@@ -157,16 +161,20 @@ jobs:
         if: steps.cache-hdf5.outputs.cache-hit != 'true'
         shell: powershell
         run: |
-          New-Item -Path 'OEPlugins' -ItemType Directory -Force
-          git clone --branch main https://github.com/open-ephys-plugins/OpenEphysHDF5Lib.git OEPlugins\OpenEphysHDF5Lib
-          cd OEPlugins\OpenEphysHDF5Lib\Build
-          $mainRepoPath = (Resolve-Path "..\..\").Path
-          cmake -G "Visual Studio 17 2022" -A x64 -DPLUGIN_HEADER_PATH="$mainRepoPath\Plugins\Headers" -DJUCE_DIRECTORY="$mainRepoPath\JuceLibraryCode" ..
+          $workspace = $env:GITHUB_WORKSPACE
+          $pluginsDir = Join-Path $workspace "OEPlugins"
+          New-Item -Path $pluginsDir -ItemType Directory -Force
+          $pluginDir = Join-Path $pluginsDir "OpenEphysHDF5Lib"
+          git clone --branch main https://github.com/open-ephys-plugins/OpenEphysHDF5Lib.git $pluginDir
+          $buildDir = Join-Path $pluginDir "Build"
+          cd $buildDir
+          cmake -G "Visual Studio 17 2022" -A x64 -DPLUGIN_HEADER_PATH="$workspace\Plugins\Headers" -DJUCE_DIRECTORY="$workspace\JuceLibraryCode" ..
           msbuild ALL_BUILD.vcxproj -p:Configuration=Release -p:Platform=x64 -m
       - name: Install OpenEphysHDF5Lib
         shell: powershell
         run: |
-          cd OEPlugins\OpenEphysHDF5Lib\Build
+          $workspace = $env:GITHUB_WORKSPACE
+          cd "$workspace\OEPlugins\OpenEphysHDF5Lib\Build"
           msbuild INSTALL.vcxproj -p:Configuration=Release -p:Platform=x64
       - name: Save OpenEphysHDF5Lib cache
         if: steps.cache-hdf5.outputs.cache-hit != 'true'
@@ -186,16 +194,20 @@ jobs:
         if: steps.cache-nwb.outputs.cache-hit != 'true'
         shell: powershell
         run: |
-          New-Item -Path 'OEPlugins' -ItemType Directory -Force
-          git clone --branch main https://github.com/open-ephys-plugins/nwb-format.git OEPlugins\nwb-format
-          cd OEPlugins\nwb-format\Build
-          $mainRepoPath = (Resolve-Path "..\..\").Path
-          cmake -G "Visual Studio 17 2022" -A x64 -DPLUGIN_HEADER_PATH="$mainRepoPath\Plugins\Headers" -DJUCE_DIRECTORY="$mainRepoPath\JuceLibraryCode" ..
+          $workspace = $env:GITHUB_WORKSPACE
+          $pluginsDir = Join-Path $workspace "OEPlugins"
+          New-Item -Path $pluginsDir -ItemType Directory -Force
+          $pluginDir = Join-Path $pluginsDir "nwb-format"
+          git clone --branch main https://github.com/open-ephys-plugins/nwb-format.git $pluginDir
+          $buildDir = Join-Path $pluginDir "Build"
+          cd $buildDir
+          cmake -G "Visual Studio 17 2022" -A x64 -DPLUGIN_HEADER_PATH="$workspace\Plugins\Headers" -DJUCE_DIRECTORY="$workspace\JuceLibraryCode" ..
           msbuild ALL_BUILD.vcxproj -p:Configuration=Release -p:Platform=x64 -m
       - name: Install nwb-format
         shell: powershell
         run: |
-          cd OEPlugins\nwb-format\Build
+          $workspace = $env:GITHUB_WORKSPACE
+          cd "$workspace\OEPlugins\nwb-format\Build"
           msbuild INSTALL.vcxproj -p:Configuration=Release -p:Platform=x64
       - name: Save nwb-format cache
         if: steps.cache-nwb.outputs.cache-hit != 'true'
