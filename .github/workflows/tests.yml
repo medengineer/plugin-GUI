@@ -117,7 +117,8 @@ jobs:
           New-Item -Path 'OEPlugins' -ItemType Directory -Force
           git clone --branch main https://github.com/open-ephys-plugins/open-ephys-data-format.git OEPlugins\open-ephys-data-format
           cd OEPlugins\open-ephys-data-format\Build
-          cmake -G "Visual Studio 17 2022" -A x64 ..
+          $mainRepoPath = (Resolve-Path "..\..\").Path
+          cmake -G "Visual Studio 17 2022" -A x64 -DPLUGIN_HEADER_PATH="$mainRepoPath\Plugins\Headers" -DJUCE_DIRECTORY="$mainRepoPath\JuceLibraryCode" ..
           msbuild ALL_BUILD.vcxproj -p:Configuration=Release -p:Platform=x64 -m
       - name: Install open-ephys-data-format
         shell: powershell
@@ -145,7 +146,8 @@ jobs:
           New-Item -Path 'OEPlugins' -ItemType Directory -Force
           git clone --branch main https://github.com/open-ephys-plugins/OpenEphysHDF5Lib.git OEPlugins\OpenEphysHDF5Lib
           cd OEPlugins\OpenEphysHDF5Lib\Build
-          cmake -G "Visual Studio 17 2022" -A x64 ..
+          $mainRepoPath = (Resolve-Path "..\..\").Path
+          cmake -G "Visual Studio 17 2022" -A x64 -DPLUGIN_HEADER_PATH="$mainRepoPath\Plugins\Headers" -DJUCE_DIRECTORY="$mainRepoPath\JuceLibraryCode" ..
           msbuild ALL_BUILD.vcxproj -p:Configuration=Release -p:Platform=x64 -m
       - name: Install OpenEphysHDF5Lib
         shell: powershell
@@ -173,7 +175,8 @@ jobs:
           New-Item -Path 'OEPlugins' -ItemType Directory -Force
           git clone --branch main https://github.com/open-ephys-plugins/nwb-format.git OEPlugins\nwb-format
           cd OEPlugins\nwb-format\Build
-          cmake -G "Visual Studio 17 2022" -A x64 ..
+          $mainRepoPath = (Resolve-Path "..\..\").Path
+          cmake -G "Visual Studio 17 2022" -A x64 -DPLUGIN_HEADER_PATH="$mainRepoPath\Plugins\Headers" -DJUCE_DIRECTORY="$mainRepoPath\JuceLibraryCode" ..
           msbuild ALL_BUILD.vcxproj -p:Configuration=Release -p:Platform=x64 -m
       - name: Install nwb-format
         shell: powershell
